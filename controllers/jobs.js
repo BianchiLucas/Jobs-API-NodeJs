@@ -1,6 +1,13 @@
+const Job = require('../models/Job');
+const { StatusCodes } = require('http-status-codes');
+const { BadRequestError, UnauthenticatedError } = require('../errors');
+
 
 const getAllJobs = async (req, res) => {
-    res.send('Get all jobs')
+    // Traer AllJobs con el metodo .find pero solamente los del usuario según userID, y ordenando por fecha de creación .sort
+    const jobs = await Job.find({ createdBy: req.user.userID }).sort('createdAt')
+    // Enviando los jobs y la cantidad 
+    res.status(StatusCodes.OK).json({ jobs, count: jobs.length })
 };
 
 const getJob = async (req, res) => {
@@ -8,7 +15,11 @@ const getJob = async (req, res) => {
 };
 
 const createJob = async (req, res) => {
-    res.json(req.user)
+    // Asignar el ID de usuario al job según la propiedad createdBy del modelo Job
+    req.body.createdBy = req.user.userID
+    // Crear el job con el metodo create
+    const job = await Job.create(req.body)
+    res.status(StatusCodes.CREATED).json({ job })
 };
 
 const updateJob = async (req, res) => {
