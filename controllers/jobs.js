@@ -1,6 +1,6 @@
 const Job = require('../models/Job');
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, UnauthenticatedError } = require('../errors');
+const { BadRequestError, NotFoundError } = require('../errors');
 
 
 const getAllJobs = async (req, res) => {
@@ -11,7 +11,17 @@ const getAllJobs = async (req, res) => {
 };
 
 const getJob = async (req, res) => {
-    res.send('Get job')
+    // Se necesita destructurar del request tanto el ID del usuario como el parámetro del ID del job
+    const { user: { userID }, params: { id: jobID } } = req
+
+    // Buscar según el método .findOne donde _id (model DB) es jobID y createdBy(timestamp DB) es userID
+    const job = await Job.findOne({ _id: jobID, createdBy: userID })
+
+    //Comprobando errores
+    if (!job) {
+        throw new NotFoundError(`No job with ID: ${jobID}`)
+    }
+    res.status(StatusCodes.OK).json({ job })
 };
 
 const createJob = async (req, res) => {
