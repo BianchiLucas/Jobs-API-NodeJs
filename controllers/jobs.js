@@ -33,7 +33,20 @@ const createJob = async (req, res) => {
 };
 
 const updateJob = async (req, res) => {
-    res.send('Update job')
+    // Se necesita destructurar del request ID de user, ID de jobs de params, y del body company y position  
+    const { user: { userID }, params: { id: jobID }, body: { company, position } } = req
+
+    if (!company || !position) {
+        throw new BadRequestError('Company or position fields can not be empty')
+    }
+
+    // A partir del método .findByIdAndUpdate(id/updateObject/options) buscar según job ID y usuario creador del mismo
+    const job = await Job.findByIdAndUpdate({ _id: jobID, createdBy: userID }, req.body, { new: true, runValidators: true })
+
+    if (!job) {
+        throw new NotFoundError(`No job with ID: ${jobID}`)
+    }
+    res.status(StatusCodes.OK).json({ job })
 };
 
 const deleteJob = async (req, res) => {
