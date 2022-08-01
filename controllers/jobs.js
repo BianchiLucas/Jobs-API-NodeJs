@@ -50,7 +50,16 @@ const updateJob = async (req, res) => {
 };
 
 const deleteJob = async (req, res) => {
-    res.send('Delete job1')
+    // Se necesita destructurar del request tanto el ID del usuario como el parámetro del ID del job
+    const { user: { userID }, params: { id: jobID } } = req
+
+    // El método es .findByIdAndDelete
+    const job = await Job.findByIdAndDelete({_id: jobID, createdBy: userID})
+
+    if(!job) {
+        throw new NotFoundError(`No job with ID: ${jobID}`)
+    }
+    res.status(StatusCodes.OK).send()
 };
 
 module.exports = {
